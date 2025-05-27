@@ -18,7 +18,6 @@ Go to: https://openrouter.ai/
 Log in with GitHub or Google
 
 Copy your API key from: https://openrouter.ai/account/keys
-First, run the development server:
 
 ## 🛠 Step 2: Add to ```.env```
 ```OPENROUTER_API_KEY=your_openrouter_key_here```
