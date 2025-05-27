@@ -3,6 +3,7 @@ import { useState } from 'react';
 export default function Home() {
   const [keywords, setKeywords] = useState('');
   const [output, setOutput] = useState('');
+  const [files, setFiles] = useState([]);
 
   const generateFeatureFile = async () => {
     const res = await fetch('/api/generate-feature', {
@@ -12,15 +13,34 @@ export default function Home() {
     });
 
     const data = await res.json();
-    setOutput(data.featureFile || data.error);
+    const featureText = data.featureFile || data.error;
+    setOutput(featureText);
+
+    // Extract the feature header
+    const featureMatch = featureText.match(/^(Feature:.*?)(\r?\n)+/is);
+    const featureHeader = featureMatch ? featureMatch[1] : 'Feature: Feature';
+    const titleMatch = featureHeader.match(/Feature:\s*(.+)/i);
+    const baseName = titleMatch ? titleMatch[1].trim().toLowerCase().replace(/\s+/g, '-') : 'feature';
+
+    // Match all complete Scenario blocks
+    const scenarioMatches = [...featureText.matchAll(/^\s*Scenario:.*(?:\r?\n(?:\s{2,}.+|$))+/gm)];
+
+    const fileList = scenarioMatches.map((match, index) => {
+      const scenarioBlock = match[0].trim();
+      const content = `${featureHeader}\n\n${scenarioBlock}`;
+      const filename = `${baseName}-scenario-${index + 1}.feature`;
+      return { name: filename, content };
+    });
+
+    setFiles(fileList);
   };
 
-  const downloadFeatureFile = () => {
-    const blob = new Blob([output], { type: 'text/plain' });
+  const downloadFile = (name, content) => {
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'feature.feature';
+    link.download = name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -29,7 +49,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h2>Cucumber Feature Generator</h2>
+      <h2>🧪 Cucumber Feature Generator</h2>
       <input
         type="text"
         placeholder="e.g. login, error, forgot password"
@@ -46,12 +66,18 @@ export default function Home() {
           <pre style={{ whiteSpace: 'pre-wrap', marginTop: '2rem', background: '#f9f9f9', padding: '1rem' }}>
             {output}
           </pre>
-          <button onClick={downloadFeatureFile} style={{ marginTop: '1rem' }}>
-            ⬇️ Download .feature File
-          </button>
+          <h3 style={{ marginTop: '1rem' }}>⬇️ Download Scenarios</h3>
+          <ul>
+            {files.map((file, idx) => (
+              <li key={idx}>
+                <button onClick={() => downloadFile(file.name, file.content)}>
+                  {file.name}
+                </button>
+              </li>
+            ))}
+          </ul>
         </>
       )}
     </div>
   );
 }
-
