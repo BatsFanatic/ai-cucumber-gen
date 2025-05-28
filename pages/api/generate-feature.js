@@ -7,23 +7,21 @@ export default async function handler(req, res) {
 
   const { keywords } = req.body;
 
-  const prompt = `
-You are a QA engineer. Write a Gherkin (.feature) file using these keywords:
-"${keywords.join(', ')}"
-
-Use the format:
-Feature: <Title>
-  Scenario: <Title>
-    Given ...
-    When ...
-    Then ...
-`;
+  //ai prompt
+  const prompt = `You are a QA engineer. Write a Gherkin (.feature) file using these keywords:
+    "${keywords.join(', ')}"
+      Use the format:
+      Feature: <Title>
+        Scenario: <Title>
+          Given ...
+          When ...
+          Then ...`;
 
   try {
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        model: 'mistralai/mistral-7b-instruct',
+        model: 'mistralai/mistral-7b-instruct', //Uses Mistral 7B Instruct model
         messages: [
           { role: 'system', content: 'You are a helpful assistant for writing Cucumber feature files.' },
           { role: 'user', content: prompt },

@@ -35,6 +35,7 @@ export default function Home() {
     setFiles(fileList);
   };
 
+  // Function to download a file
   const downloadFile = (name, content) => {
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -47,9 +48,10 @@ export default function Home() {
     URL.revokeObjectURL(url);
   };
 
+  //Rendering the UI
   return (
     <div style={{ padding: '2rem' }}>
-      <h2>🧪 Cucumber Feature Generator</h2>
+      <h2>Cucumber Feature Generator</h2>
       <input
         type="text"
         placeholder="e.g. login, error, forgot password"
